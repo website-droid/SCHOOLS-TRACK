@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Teacher Portal – EduNexa Pro (Supabase)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Supabase SDK (replaces Firebase) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            padding: 40px 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-container h2 { color: #0a2f2a; margin-bottom: 5px; }
+        .login-container h2 span { color: #f59e0b; }
+        .login-container p { color: #64748b; margin-bottom: 20px; }
+        .login-container input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .login-container input:focus { outline: none; border-color: #166534; }
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 40px;
+            border: none;
+            background: #166534;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .login-container button:hover { background: #0f4c3a; }
+        .login-container button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-msg { color: #dc2626; font-size: 13px; margin: 10px 0; display: none; }
+        
+        .dashboard {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        .top-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .top-bar h3 { color: #0a2f2a; }
+        .top-bar h3 span { color: #f59e0b; }
+        .top-bar .teacher-info { font-size: 14px; color: #475569; }
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .logout-btn:hover { background: #b91c1c; }
+        
+        .section-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eef2f5;
+        }
+        .section-header h3 { font-size: 18px; color: #1a3a1a; }
+        .section-header .assigned-info { font-size: 14px; color: #64748b; }
+        
+        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 12px; }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 600px;
+        }
+        .data-table th, .data-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .data-table th { background: #f8fafc; font-weight: 600; }
+        .data-table tr:hover { background: #f8fafc; }
+        .mark-input {
+            width: 65px;
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+            font-size: 13px;
+        }
+        .save-btn {
+            background: #166534;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+        .save-btn:hover { background: #0f4c3a; }
+        .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            z-index: 3000;
+            animation: fadeOut 3s ease;
+            font-size: 13px;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #166534;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { rotate: 0deg; } 100% { rotate: 360deg; } }
+        
+        @media (max-width: 768px) {
+            .login-container { padding: 30px 20px; margin: 20px; }
+            .dashboard { padding: 10px; }
+            .top-bar { flex-direction: column; gap: 10px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SECTION -->
+<div id="loginSection" class="login-container">
+    <div style="background: #0a2f2a; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+        <i class="fas fa-chalkboard-user" style="font-size: 35px; color: #ffcd3c;"></i>
+    </div>
+    <h2>EduNexa <span>Pro</span></h2>
+    <p>Teacher Portal – Marks Entry</p>
+    
+    <input type="email" id="teacherEmail" placeholder="Teacher Email">
+    <input type="password" id="teacherPassword" placeholder="Password">
+    <input type="text" id="schoolCode" placeholder="School MOE Code">
+    <div id="loginError" class="error-msg"></div>
+    <button onclick="teacherLogin()" id="loginBtn">Login</button>
+    <p style="margin-top: 15px; font-size: 12px; color: #94a3b8;">
+        <i class="fas fa-info-circle"></i> Use your registered teacher email and school MOE code.
+    </p>
+</div>
+
+<!-- DASHBOARD SECTION -->
+<div id="dashboardSection" class="dashboard">
+    <div class="top-bar">
+        <div>
+            <h3>📚 <span>EduNexa</span> Pro – Teacher Portal</h3>
+            <div class="teacher-info" id="teacherInfo">Welcome, <strong id="teacherNameDisplay"></strong> | <span id="teacherAssignedDisplay"></span></div>
+        </div>
+        <button class="logout-btn" onclick="teacherLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <h3>📝 Enter Marks</h3>
+            <div class="assigned-info" id="classStreamDisplay"></div>
+        </div>
+        <div id="marksContainer">
+            <div style="text-align:center; padding:30px; color:#64748b;">
+                <i class="fas fa-spinner fa-spin"></i> Loading students...
+            </div>
+        </div>
+        <div style="text-align:right;">
+            <button class="save-btn" onclick="saveTeacherMarks()" id="saveBtn">💾 Save All Marks</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== SUPABASE CONFIGURATION ====================
+    const SUPABASE_URL = 'https://hwxmmposxwisjzytcutb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3eG1tcG9zeHdpc2p6eXRjdXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MTU3ODAsImV4cCI6MjA5NjM5MTc4MH0.7cl0jQKuCIVjiP3F-WOTu9VEt4ltrhq2Qu2wuqbunH8';
+
+    let supabase;
+    try {
+        const { createClient } = supabaseJs;
+        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("✅ Supabase initialized");
+    } catch(e) {
+        console.log("Supabase error:", e);
+        alert("Failed to connect to Supabase. Please check your internet connection.");
+    }
+
+    // ==================== GLOBAL VARIABLES ====================
+    let currentTeacher = null;
+    let teacherData = null;
+    let teacherStudents = [];
+    let teacherSubjects = [];
+    let isLoggingIn = false;
+
+    // ==================== SUBJECTS ====================
+    const subjectsMap = {
+        prePrimary: ["Language Activities", "Mathematical Activities", "Environmental Activities", "Psychomotor Activities", "Religious Education"],
+        lowerPrimary: ["English", "Kiswahili", "Mathematics", "Environmental Activities", "Creative Arts", "Religious Education"],
+        upperPrimary: ["English", "Kiswahili", "Mathematics", "Science and Technology", "Social Studies", "Religious Education", "Creative Arts"],
+        juniorSecondary: ["English", "Kiswahili", "Mathematics", "Integrated Science", "Social Studies", "Religious Education", "Agriculture", "Pre-Technical Studies", "Creative Arts and Sports"]
+    };
+
+    function getSubjects(grade) {
+        if (grade === "PP1" || grade === "PP2") return subjectsMap.prePrimary;
+        let n = parseInt(grade.split(" ")[1]);
+        if (n <= 3) return subjectsMap.lowerPrimary;
+        if (n <= 6) return subjectsMap.upperPrimary;
+        return subjectsMap.juniorSecondary;
+    }
+
+    function showToast(msg, isErr) {
+        let t = document.createElement("div");
+        t.className = "toast";
+        t.style.background = isErr ? "#dc2626" : "#166534";
+        t.innerHTML = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    // ==================== TEACHER LOGIN ====================
+    window.teacherLogin = async function() {
+        if (isLoggingIn) return;
+        
+        const email = document.getElementById('teacherEmail').value.trim();
+        const password = document.getElementById('teacherPassword').value.trim();
+        const schoolCode = document.getElementById('schoolCode').value.trim();
+        const errorDiv = document.getElementById('loginError');
+        const loginBtn = document.getElementById('loginBtn');
+
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+
+        if (!email || !password || !schoolCode) {
+            errorDiv.textContent = 'Please enter email, password, and school MOE code.';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        isLoggingIn = true;
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
+
+        try {
+            // 1. Authenticate with Supabase
+            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (authError) throw authError;
+            const user = authData.user;
+            console.log("✅ Authenticated:", user.email);
+
+            // 2. Check if this user is a registered teacher with matching school code
+            const { data: teacherRows, error: teacherError } = await supabase
+                .from('teachers')
+                .select('*')
+                .eq('email', email)
+                .eq('moe_code', schoolCode)
+                .limit(1);
+
+            if (teacherError) throw teacherError;
+
+            if (!teacherRows || teacherRows.length === 0) {
+                errorDiv.textContent = 'Access denied. Invalid teacher credentials or school code.';
+                errorDiv.style.display = 'block';
+                await supabase.auth.signOut();
+                isLoggingIn = false;
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Login';
+                return;
+            }
+
+            const teacher = teacherRows[0];
+            teacherData = teacher;
+            currentTeacher = user;
+            console.log("✅ Teacher data loaded:", teacherData);
+
+            if (!teacherData.grade || !teacherData.stream) {
+                errorDiv.textContent = 'Your account is missing assigned grade or stream. Contact admin.';
+                errorDiv.style.display = 'block';
+                await supabase.auth.signOut();
+                isLoggingIn = false;
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Login';
+                return;
+            }
+
+            // 3. Load students for this teacher's class
+            await loadTeacherStudents();
+
+            // 4. Show dashboard
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+
+            document.getElementById('teacherNameDisplay').textContent = teacherData.name || 'Teacher';
+            document.getElementById('teacherAssignedDisplay').textContent = `${teacherData.grade} - ${teacherData.stream}`;
+            document.getElementById('classStreamDisplay').textContent = `📚 ${teacherData.grade} - ${teacherData.stream}`;
+
+            showToast(`Welcome, ${teacherData.name || 'Teacher'}!`, false);
+
+        } catch (error) {
+            console.error("Login error:", error);
+            errorDiv.textContent = 'Login failed: ' + error.message;
+            errorDiv.style.display = 'block';
+            try { await supabase.auth.signOut(); } catch(e) {}
+        }
+
+        isLoggingIn = false;
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Login';
+    };
+
+    // ==================== LOAD TEACHER STUDENTS ====================
+    async function loadTeacherStudents() {
+        const container = document.getElementById('marksContainer');
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Loading students...</div>';
+
+        try {
+            const grade = teacherData.grade;
+            const stream = teacherData.stream;
+
+            // Fetch students from Supabase
+            const { data: students, error } = await supabase
+                .from('students')
+                .select('*')
+                .eq('class', grade)
+                .eq('stream', stream);
+
+            if (error) throw error;
+
+            teacherStudents = students || [];
+            teacherSubjects = getSubjects(grade);
+            console.log(`📚 Loaded ${teacherStudents.length} students, ${teacherSubjects.length} subjects`);
+
+            if (teacherStudents.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:#64748b;">
+                    <i class="fas fa-users"></i> No students found in ${grade} - ${stream}.
+                </div>`;
+                return;
+            }
+
+            renderMarksTable();
+
+        } catch (error) {
+            console.error("Load students error:", error);
+            container.innerHTML = `<div style="text-align:center; padding:30px; color:#dc2626;">
+                <i class="fas fa-exclamation-circle"></i> Error loading students: ${error.message}
+            </div>`;
+        }
+    }
+
+    // ==================== RENDER MARKS TABLE ====================
+    function renderMarksTable() {
+        const container = document.getElementById('marksContainer');
+
+        let html = `<div class="table-wrapper"><table class="data-table"><thead><tr>
+            <th>#</th>
+            <th>Student Name</th>`;
+
+        teacherSubjects.forEach(sub => {
+            html += `<th>${sub}</th>`;
+        });
+
+        html += `</tr></thead><tbody>`;
+
+        teacherStudents.forEach((student, index) => {
+            html += `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${escapeHtml(student.name)}</strong></td>`;
+
+            teacherSubjects.forEach(sub => {
+                const key = sub.toLowerCase().replace(/[^a-z]/g, '');
+                const value = (student.marks && student.marks[key]) || 0;
+                html += `<td><input type="number" class="mark-input" 
+                    data-student-id="${student.id}" 
+                    data-subject="${sub}" 
+                    value="${value}" 
+                    min="0" max="100" step="1"></td>`;
+            });
+
+            html += `</tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+        html += `<div style="margin-top:10px; font-size:12px; color:#64748b;">
+            <i class="fas fa-info-circle"></i> Enter marks (0-100) for each student. Click "Save All Marks" to save.
+        </div>`;
+
+        container.innerHTML = html;
+    }
+
+    // ==================== SAVE TEACHER MARKS ====================
+    window.saveTeacherMarks = async function() {
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+
+        try {
+            const inputs = document.querySelectorAll('.mark-input');
+            const updates = {};
+
+            inputs.forEach(input => {
+                const studentId = input.dataset.studentId;
+                const subject = input.dataset.subject;
+                const value = Math.min(100, Math.max(0, parseInt(input.value) || 0));
+
+                if (!updates[studentId]) updates[studentId] = {};
+                const key = subject.toLowerCase().replace(/[^a-z]/g, '');
+                updates[studentId][key] = value;
+            });
+
+            let savedCount = 0;
+            for (const [studentId, marks] of Object.entries(updates)) {
+                const student = teacherStudents.find(s => s.id === studentId);
+                if (student) {
+                    if (!student.marks) student.marks = {};
+                    Object.assign(student.marks, marks);
+
+                    // Update in Supabase
+                    const { error } = await supabase
+                        .from('students')
+                        .update({ marks: student.marks })
+                        .eq('id', studentId);
+
+                    if (error) throw error;
+                    savedCount++;
+                }
+            }
+
+            showToast(`✅ ${savedCount} students' marks saved successfully!`, false);
+
+        } catch (error) {
+            console.error("Save error:", error);
+            showToast(`❌ Error saving marks: ${error.message}`, true);
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '💾 Save All Marks';
+    };
+
+    // ==================== TEACHER LOGOUT ====================
+    window.teacherLogout = async function() {
+        try {
+            await supabase.auth.signOut();
+        } catch(e) {}
+        
+        currentTeacher = null;
+        teacherData = null;
+        teacherStudents = [];
+        isLoggingIn = false;
+
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('loginSection').style.display = 'block';
+
+        document.getElementById('teacherEmail').value = '';
+        document.getElementById('teacherPassword').value = '';
+        document.getElementById('schoolCode').value = '';
+        document.getElementById('loginError').style.display = 'none';
+
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Login';
+
+        showToast('Logged out successfully', false);
+    };
+
+    // ==================== HELPER FUNCTIONS ====================
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+    }
+
+    // ==================== CHECK EXISTING SESSION ====================
+    // Supabase session check using onAuthStateChange
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            const user = session?.user;
+            if (user && !isLoggingIn) {
+                console.log("👤 Session found for:", user.email);
+                // Optional: auto-login if teacher exists
+                // For simplicity, we'll let the user click login again.
+                // But we can try to restore teacher data if needed.
+            }
+        } else if (event === 'SIGNED_OUT') {
+            // Clean up
+            if (!isLoggingIn) {
+                // already signed out
+            }
+        }
+    });
+
+    console.log("✅ Teacher Portal loaded successfully (Supabase)");
+</script>
+</body>
+</html>
