@@ -11,162 +11,41 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .login-container {
-            max-width: 400px;
-            width: 100%;
-            background: white;
-            border-radius: 40px;
-            padding: 40px 35px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+        .login-container { max-width: 400px; width: 100%; background: white; border-radius: 40px; padding: 40px 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
         .login-container h2 { color: #0a2f2a; margin-bottom: 5px; }
         .login-container h2 span { color: #f59e0b; }
         .login-container p { color: #64748b; margin-bottom: 20px; }
-        .login-container input {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            font-size: 14px;
-        }
+        .login-container input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #ddd; margin: 10px 0; font-size: 14px; }
         .login-container input:focus { outline: none; border-color: #166534; }
-        .login-container button {
-            width: 100%;
-            padding: 12px;
-            border-radius: 40px;
-            border: none;
-            background: #166534;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .login-container button { width: 100%; padding: 12px; border-radius: 40px; border: none; background: #166534; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .login-container button:hover { background: #0f4c3a; }
         .login-container button:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-msg { color: #dc2626; font-size: 13px; margin: 10px 0; display: none; }
-        .dashboard {
-            display: none;
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-        }
-        .top-bar {
-            background: white;
-            border-radius: 20px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        .dashboard { display: none; width: 100%; max-width: 1200px; padding: 20px; }
+        .top-bar { background: white; border-radius: 20px; padding: 15px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .top-bar h3 { color: #0a2f2a; }
         .top-bar h3 span { color: #f59e0b; }
         .top-bar .teacher-info { font-size: 14px; color: #475569; }
-        .logout-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-        }
+        .logout-btn { background: #dc2626; color: white; border: none; padding: 8px 20px; border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 13px; }
         .logout-btn:hover { background: #b91c1c; }
-        .section-card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eef2f5;
-        }
+        .section-card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eef2f5; }
         .section-header h3 { font-size: 18px; color: #1a3a1a; }
         .section-header .assigned-info { font-size: 14px; color: #64748b; }
         .table-wrapper { width: 100%; overflow-x: auto; margin-top: 12px; }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            min-width: 600px;
-        }
-        .data-table th, .data-table td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #edf2f7;
-        }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+        .data-table th, .data-table td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #edf2f7; }
         .data-table th { background: #f8fafc; font-weight: 600; }
         .data-table tr:hover { background: #f8fafc; }
-        .mark-input {
-            width: 65px;
-            padding: 6px;
-            border-radius: 12px;
-            border: 1px solid #cbd5e1;
-            text-align: center;
-            font-size: 13px;
-        }
-        .save-btn {
-            background: #166534;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            margin-top: 15px;
-            transition: 0.2s;
-        }
+        .mark-input { width: 65px; padding: 6px; border-radius: 12px; border: 1px solid #cbd5e1; text-align: center; font-size: 13px; }
+        .save-btn { background: #166534; color: white; border: none; padding: 10px 30px; border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 14px; margin-top: 15px; transition: 0.2s; }
         .save-btn:hover { background: #0f4c3a; }
         .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e293b;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 40px;
-            z-index: 3000;
-            animation: fadeOut 3s ease;
-            font-size: 13px;
-        }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #166534;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 40px; z-index: 3000; animation: fadeOut 3s ease; font-size: 13px; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #166534; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; vertical-align: middle; }
         @keyframes spin { 0% { rotate: 0deg; } 100% { rotate: 360deg; } }
-        @media (max-width: 768px) {
-            .login-container { padding: 30px 20px; margin: 20px; }
-            .dashboard { padding: 10px; }
-            .top-bar { flex-direction: column; gap: 10px; text-align: center; }
-        }
+        @media (max-width: 768px) { .login-container { padding: 30px 20px; margin: 20px; } .dashboard { padding: 10px; } .top-bar { flex-direction: column; gap: 10px; text-align: center; } }
     </style>
 </head>
 <body>
@@ -293,12 +172,11 @@
         loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
 
         try {
-            // 1. Authenticate with Firebase
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
             console.log("✅ Authenticated:", user.email);
 
-            // 2. Try server-side query with the composite index
+            // Try server-side query
             let teacherQuery;
             let foundTeacher = null;
 
@@ -308,60 +186,27 @@
                     .where('moe_code', '==', schoolCode)
                     .limit(1)
                     .get();
-                console.log("✅ Server-side query executed.");
                 if (!teacherQuery.empty) {
                     foundTeacher = { id: teacherQuery.docs[0].id, ...teacherQuery.docs[0].data() };
-                    console.log("✅ Teacher found via server-side query:", foundTeacher);
                 }
             } catch (queryError) {
-                console.warn("⚠️ Server-side query failed:", queryError);
+                console.warn("⚠️ Server query failed:", queryError);
             }
 
-            // 3. If not found, do a client-side fallback (case-insensitive)
+            // Fallback
             if (!foundTeacher) {
-                console.log("🔍 Server query returned empty – trying client‑side fallback...");
-
-                const allTeachersSnap = await db.collection('teachers').get();
+                const allTeachers = await db.collection('teachers').get();
                 const teachers = [];
-                allTeachersSnap.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    teachers.push(data);
-                });
-
-                // Log all teachers for debugging
-                console.log("📚 All teachers in database:", teachers.map(t => ({
-                    email: t.email || t.teacher_email || 'MISSING',
-                    moe_code: t.moe_code || 'MISSING',
-                    name: t.name || 'UNKNOWN',
-                    grade: t.grade || 'MISSING',
-                    stream: t.stream || 'MISSING'
-                })));
-
-                if (teachers.length === 0) {
-                    errorDiv.textContent = 'No teachers registered. Please ask the school admin to add you as a teacher.';
-                    errorDiv.style.display = 'block';
-                    await auth.signOut();
-                    isLoggingIn = false;
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = 'Login';
-                    return;
-                }
-
+                allTeachers.forEach(doc => teachers.push({ id: doc.id, ...doc.data() }));
                 const lowerEmail = email.toLowerCase();
                 const lowerMoe = schoolCode.trim().toLowerCase();
-
                 foundTeacher = teachers.find(t => {
                     const tEmail = (t.email || t.teacher_email || '').toLowerCase().trim();
                     const tMoe = (t.moe_code || '').toLowerCase().trim();
                     return tEmail === lowerEmail && tMoe === lowerMoe;
                 });
-
-                if (foundTeacher) {
-                    console.log("✅ Found teacher via client‑side fallback:", foundTeacher);
-                } else {
-                    console.warn("❌ No matching teacher found. Check that your email and MOE code exactly match the teacher document.");
-                    errorDiv.textContent = 'Access denied. No teacher found with that email and MOE code. Check your entries or contact admin.';
+                if (!foundTeacher) {
+                    errorDiv.textContent = 'Access denied. No teacher found.';
                     errorDiv.style.display = 'block';
                     await auth.signOut();
                     isLoggingIn = false;
@@ -373,10 +218,9 @@
 
             teacherData = foundTeacher;
             currentTeacher = user;
-            console.log("✅ Teacher data loaded:", teacherData);
 
             if (!teacherData.grade || !teacherData.stream) {
-                errorDiv.textContent = 'Your account is missing assigned grade or stream. Contact admin.';
+                errorDiv.textContent = 'Missing grade/stream. Contact admin.';
                 errorDiv.style.display = 'block';
                 await auth.signOut();
                 isLoggingIn = false;
@@ -385,10 +229,8 @@
                 return;
             }
 
-            // 4. Load students for this teacher's class
             await loadTeacherStudents();
 
-            // 5. Show dashboard
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboardSection').style.display = 'block';
 
@@ -410,7 +252,7 @@
         loginBtn.innerHTML = 'Login';
     };
 
-    // ==================== LOAD TEACHER STUDENTS ====================
+    // ==================== UPDATED: LOAD TEACHER STUDENTS (Enhanced Search) ====================
     async function loadTeacherStudents() {
         const container = document.getElementById('marksContainer');
         container.innerHTML = '<div style="text-align:center; padding:30px; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Loading students...</div>';
@@ -418,23 +260,70 @@
         try {
             const grade = teacherData.grade;
             const stream = teacherData.stream;
+            console.log(`🔍 Looking for students with grade: "${grade}", stream: "${stream}"`);
 
-            const studentsSnapshot = await db.collection('students')
-                .where('class', '==', grade)
-                .where('stream', '==', stream)
-                .get();
-
-            teacherStudents = [];
-            studentsSnapshot.forEach(doc => {
-                teacherStudents.push({ id: doc.id, ...doc.data() });
+            // Fetch ALL students (we'll filter client‑side to be safe)
+            const allStudentsSnap = await db.collection('students').get();
+            const allStudents = [];
+            allStudentsSnap.forEach(doc => {
+                const data = doc.data();
+                data.id = doc.id;
+                allStudents.push(data);
             });
 
+            console.log(`📚 Total students in database: ${allStudents.length}`);
+            if (allStudents.length > 0) {
+                console.log('📋 First student sample:', allStudents[0]);
+            }
+
+            // Define possible field names for grade/class
+            const gradeFields = ['class', 'grade', 'studentClass', 'studentGrade', 'level', 'form'];
+            const streamFields = ['stream', 'section', 'group'];
+
+            const lowerGrade = grade.toLowerCase().trim();
+            const lowerStream = stream.toLowerCase().trim();
+
+            // Filter students
+            teacherStudents = allStudents.filter(s => {
+                // Try to find a grade/class field
+                let studentGrade = '';
+                let studentStream = '';
+                for (let f of gradeFields) {
+                    if (s[f] !== undefined && s[f] !== null) {
+                        studentGrade = String(s[f]).toLowerCase().trim();
+                        break;
+                    }
+                }
+                for (let f of streamFields) {
+                    if (s[f] !== undefined && s[f] !== null) {
+                        studentStream = String(s[f]).toLowerCase().trim();
+                        break;
+                    }
+                }
+                // If we couldn't find either, skip
+                if (!studentGrade || !studentStream) return false;
+                return studentGrade === lowerGrade && studentStream === lowerStream;
+            });
+
+            console.log(`✅ Found ${teacherStudents.length} students matching grade "${grade}" and stream "${stream}"`);
+
+            // If still none, log all students for debugging
+            if (teacherStudents.length === 0) {
+                console.warn('⚠️ No students matched. All students:', allStudents.map(s => {
+                    let g = '';
+                    for (let f of gradeFields) if (s[f]) { g = `${f}:${s[f]}`; break; }
+                    let st = '';
+                    for (let f of streamFields) if (s[f]) { st = `${f}:${s[f]}`; break; }
+                    return { name: s.name || 'UNKNOWN', grade: g || 'MISSING', stream: st || 'MISSING' };
+                }));
+            }
+
             teacherSubjects = getSubjects(grade);
-            console.log(`📚 Loaded ${teacherStudents.length} students, ${teacherSubjects.length} subjects`);
 
             if (teacherStudents.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:30px; color:#64748b;">
-                    <i class="fas fa-users"></i> No students found in ${grade} - ${stream}.
+                    <i class="fas fa-users"></i> No students found for your class.<br>
+                    <small>Please ask the school admin to add students with the correct class/grade and stream.</small>
                 </div>`;
                 return;
             }
@@ -575,7 +464,6 @@
     });
 
     console.log("✅ Teacher Portal loaded successfully (Firebase)");
-    console.log("ℹ️ If login fails, check the console for the list of teachers in your database.");
 </script>
 </body>
 </html>
