@@ -293,29 +293,85 @@
         loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
 
         try {
+            // 1. Authenticate with Firebase
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
             console.log("✅ Authenticated:", user.email);
 
-            // Check teacher with email + moe_code
-            const teacherQuery = await db.collection('teachers')
-                .where('email', '==', email)
-                .where('moe_code', '==', schoolCode)
-                .limit(1)
-                .get();
+            // 2. Try server-side query with the composite index
+            let teacherQuery;
+            let foundTeacher = null;
 
-            if (teacherQuery.empty) {
-                errorDiv.textContent = 'Access denied. Invalid teacher credentials or school code.';
-                errorDiv.style.display = 'block';
-                await auth.signOut();
-                isLoggingIn = false;
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Login';
-                return;
+            try {
+                teacherQuery = await db.collection('teachers')
+                    .where('email', '==', email)
+                    .where('moe_code', '==', schoolCode)
+                    .limit(1)
+                    .get();
+                console.log("✅ Server-side query executed.");
+                if (!teacherQuery.empty) {
+                    foundTeacher = { id: teacherQuery.docs[0].id, ...teacherQuery.docs[0].data() };
+                    console.log("✅ Teacher found via server-side query:", foundTeacher);
+                }
+            } catch (queryError) {
+                console.warn("⚠️ Server-side query failed:", queryError);
             }
 
-            const doc = teacherQuery.docs[0];
-            teacherData = { id: doc.id, ...doc.data() };
+            // 3. If not found, do a client-side fallback (case-insensitive)
+            if (!foundTeacher) {
+                console.log("🔍 Server query returned empty – trying client‑side fallback...");
+
+                const allTeachersSnap = await db.collection('teachers').get();
+                const teachers = [];
+                allTeachersSnap.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    teachers.push(data);
+                });
+
+                // Log all teachers for debugging
+                console.log("📚 All teachers in database:", teachers.map(t => ({
+                    email: t.email || t.teacher_email || 'MISSING',
+                    moe_code: t.moe_code || 'MISSING',
+                    name: t.name || 'UNKNOWN',
+                    grade: t.grade || 'MISSING',
+                    stream: t.stream || 'MISSING'
+                })));
+
+                if (teachers.length === 0) {
+                    errorDiv.textContent = 'No teachers registered. Please ask the school admin to add you as a teacher.';
+                    errorDiv.style.display = 'block';
+                    await auth.signOut();
+                    isLoggingIn = false;
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Login';
+                    return;
+                }
+
+                const lowerEmail = email.toLowerCase();
+                const lowerMoe = schoolCode.trim().toLowerCase();
+
+                foundTeacher = teachers.find(t => {
+                    const tEmail = (t.email || t.teacher_email || '').toLowerCase().trim();
+                    const tMoe = (t.moe_code || '').toLowerCase().trim();
+                    return tEmail === lowerEmail && tMoe === lowerMoe;
+                });
+
+                if (foundTeacher) {
+                    console.log("✅ Found teacher via client‑side fallback:", foundTeacher);
+                } else {
+                    console.warn("❌ No matching teacher found. Check that your email and MOE code exactly match the teacher document.");
+                    errorDiv.textContent = 'Access denied. No teacher found with that email and MOE code. Check your entries or contact admin.';
+                    errorDiv.style.display = 'block';
+                    await auth.signOut();
+                    isLoggingIn = false;
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Login';
+                    return;
+                }
+            }
+
+            teacherData = foundTeacher;
             currentTeacher = user;
             console.log("✅ Teacher data loaded:", teacherData);
 
@@ -329,8 +385,10 @@
                 return;
             }
 
+            // 4. Load students for this teacher's class
             await loadTeacherStudents();
 
+            // 5. Show dashboard
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboardSection').style.display = 'block';
 
@@ -509,15 +567,15 @@
     }
 
     // ==================== CHECK EXISTING SESSION ====================
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
         if (isLoggingIn) return;
         if (user) {
             console.log("👤 Session found for:", user.email);
-            // Optionally auto-login – but we let the user login manually.
         }
     });
 
     console.log("✅ Teacher Portal loaded successfully (Firebase)");
+    console.log("ℹ️ If login fails, check the console for the list of teachers in your database.");
 </script>
 </body>
-  </html>
+</html>
